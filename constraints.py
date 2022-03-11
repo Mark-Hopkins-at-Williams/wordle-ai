@@ -1,16 +1,38 @@
 import sys
+from abc import ABC, abstractmethod
 from numpy import mean
 from random import sample
-
-def read_words(filename):
-    """Reads a list of words from a file."""
-
-    with open(filename) as reader:
-        words = [line.strip() for line in reader]
-    return set(words)
+from util import read_words
 
 
-class Constraint:
+class Constraint(ABC):
+
+    @abstractmethod
+    def permits(self, word):
+        ...
+
+class EqualityConstraint(Constraint):
+
+    def __init__(self, letter, position):
+        self.letter = letter
+        self.position = position
+
+    def permits(self, word):
+        return word[self.position] == self.letter
+
+    def __eq__(self, other):
+        return self.letter == other.letter and self.position == other.position
+
+    def __hash__(self):
+        return hash(self.letter) + hash(self.position)
+
+    def __str__(self):
+        return f"{self.letter} at {self.position}"
+
+    __repr__ = __str__
+
+
+class MembershipConstraint(Constraint):
     """Represents a Wordle constraint."""
 
     def __init__(self, letter, positions):
@@ -81,6 +103,15 @@ def is_permitted(word, constraints):
     return True
 
 
+def get_constraint(letter, pos, target):
+    if target[pos] == letter:
+        return EqualityConstraint(letter, pos)
+    elif letter in target:
+        return MembershipConstraint(letter, set(range(len(target))) - {pos})
+    else:
+        return MembershipConstraint(letter, set([]))
+
+
 def get_constraints(guess, target):
     """Produces the set of constraints resulting from a particular guess, given a target.
 
@@ -99,59 +130,6 @@ def get_constraints(guess, target):
 
     result = []
     for pos, letter in enumerate(guess):
-        if target[pos] == letter:
-            result.append(Constraint(letter, {pos}))
-        elif letter in target:
-            result.append(Constraint(letter, set(range(len(target))) - {pos}))
-        else:
-            result.append(Constraint(letter, set([])))
+        result.append(get_constraint(letter, pos, target))
     return set(result)
 
-
-def reduction(guess, target, pool):
-    """Computes the percentage of the word pool that remains possible after a guess.
-
-    Parameters
-    ----------
-    guess : str
-        The guessed word
-    target : str
-        The game's secret target word
-    pool : iterable[str]
-        The pool of possible guesses, prior to the current guess
-
-    Returns
-    -------
-    float
-        The percentage of the pool that remains possible after the guess
-    """
-
-    constraints = get_constraints(guess, target)
-    permitted = [word for word in pool if is_permitted(word, constraints)]
-    return len(permitted) / len(pool)
-
-
-def expected_reduction(guess, targets, pool):
-    return mean([reduction(guess, target, pool) for target in targets])
-
-
-def best_expected_reduction(targets, pool):
-    eps = 0.000001
-    best, best_reduction = None, 1.0 + eps
-    for guess in pool:
-        guess_reduction = expected_reduction(guess, targets, pool)
-        if guess_reduction < best_reduction:
-            best, best_reduction = guess, guess_reduction
-    return best
-
-
-def main(num_samples):
-    allowed = read_words('wordle-allowed-guesses.txt')
-    subset = sample(allowed, num_samples)
-    best_guess = best_expected_reduction(subset, subset)
-    print(f"From a random pool of {num_samples} words:")
-    print(f"  the best first guess is {best_guess}")
-
-
-if __name__ == "__main__":
-    main(num_samples=int(sys.argv[1]))
