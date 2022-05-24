@@ -8,17 +8,10 @@
 
 #### to compute the "best" first guess
 
-    python agent.py allowed.txt answers.txt 
+    python agent.py data/answers.txt data/answers.txt 
  
 
-#### to have the AI play a single game
+#### to have the AI play the demo
 
-    python play.py allowed.txt answers.txt 
-
-
-#### to have the AI play K games in a row
-
-    python play.py allowed.txt answers.txt K 
-
- 
+    python play.py data/answers.txt data/answers.txt 
 

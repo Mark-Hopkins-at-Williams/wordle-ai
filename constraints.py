@@ -145,3 +145,26 @@ def get_constraint_colors(guess, target):
             result[pos] = "yellow"
             target = target[:target.find(letter)] + "*" + target[target.find(letter)+1:]
     return result
+
+
+def update_pool(guess, target, pool):
+    """Updates the pool of possible answers after a guess.
+
+    Parameters
+    ----------
+    guess : str
+        The player's guess
+    target : str
+        The hidden target word
+    pool : list[str]
+        Original pool of possible answers.
+
+    Returns
+    -------
+    list[str]
+        The subset of the original pool that remain possible after making the guess.
+    """
+
+    constraints = get_constraints(guess, target)
+    permitted = [word for word in pool if is_permitted(word, constraints)]
+    return permitted

@@ -33,7 +33,6 @@ class CartesianPlane:
         pg.display.flip()
         self.sprite_list = []
         self.sprites = pg.sprite.RenderPlain(self.sprite_list)
-        self.screen = pg.display.get_surface()
         self.widgets = []
 
     def clear(self):
