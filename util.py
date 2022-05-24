@@ -4,3 +4,12 @@ def read_words(filename):
     with open(filename) as reader:
         words = [line.strip() for line in reader]
     return words
+
+
+from scipy.optimize import minimize
+
+def make_f(a):
+    def f(x, y):
+        return a*x + y
+    return f
+

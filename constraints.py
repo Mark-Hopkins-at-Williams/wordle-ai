@@ -133,3 +133,15 @@ def get_constraints(guess, target):
         result.append(get_constraint(letter, pos, target))
     return set(result)
 
+
+def get_constraint_colors(guess, target):
+    result = ["gray"] * 5
+    for pos, letter in enumerate(guess):
+        if target[pos] == letter:
+            result[pos] = "green"
+            target = target[:pos] + "*" + target[pos+1:]
+    for pos, letter in enumerate(guess):
+        if letter in target and result[pos] != "green":
+            result[pos] = "yellow"
+            target = target[:target.find(letter)] + "*" + target[target.find(letter)+1:]
+    return result

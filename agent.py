@@ -10,7 +10,7 @@ from infomax import expectation
 
 class WordleAgent:
 
-    def __init__(self, cost_fn):
+    def __init__(self, cost_fn, track_progress=True):
         """
         Parameters
         ----------
@@ -20,6 +20,7 @@ class WordleAgent:
         """
 
         self.cost_fn = cost_fn
+        self.track_progress = track_progress
 
     def score_guesses(self, guesses, pool):
         """Scores each candidate guess, given a pool of possible answers.
@@ -38,7 +39,11 @@ class WordleAgent:
         """
 
         word_scores = []
-        for word in tqdm(guesses):
+        if self.track_progress:
+            words = tqdm(guesses)
+        else:
+            words = guesses
+        for word in words:
             score = self.cost_fn(word, pool)
             word_scores.append((score, word))
         word_scores = sorted(word_scores)
